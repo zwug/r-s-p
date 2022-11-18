@@ -2,7 +2,7 @@ import { Typography } from 'antd';
 import { useEffect } from 'react';
 import { Route, Routes } from 'react-router';
 import './App.css';
-import { Create } from './containers/create';
+import { CreateGame } from './containers/create-game';
 import { Main } from './containers/main';
 import { BrowserRouter } from "react-router-dom";
 
@@ -18,7 +18,7 @@ function App() {
         <Routes>
           <Route path='' element={<Main />}>
           </Route>
-          <Route path='/create' element={<Create />}>
+          <Route path='/create' element={<CreateGame />}>
           </Route>
         </Routes>
       </div>
