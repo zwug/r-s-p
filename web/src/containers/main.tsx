@@ -1,14 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-type TMainProps = {
+type TMainProps = {};
 
-}
-
-export const Main = ({ }: TMainProps): JSX.Element => {
+export const Main = ({}: TMainProps): JSX.Element => {
   return (
     <div>
       <Link to='/create'>Create</Link>
     </div>
   );
-}
+};

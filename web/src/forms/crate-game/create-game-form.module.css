@@ -1,0 +1,7 @@
+.errorContainer {
+  margin: 20px auto;
+}
+
+.errorHidden {
+  opacity: 0;
+}
