@@ -39,53 +39,50 @@ const io = new Server<
 app.use(cors(corsOptions));
 
 io.use((socket, next) => {
-  // const sockets = await io.fetchSockets();
-  // console.log(sockets.length);
-
-  console.log('use');
-  
-
   const nickname = socket.handshake.auth.nickname;
   if (!nickname) {
     return next(new Error('invalid nickname'));
   }
   socket.data.nickname = nickname;
+  const socketId = socket.id;
 
   const { rounds, gameId, action } = socket.handshake.query;
 
   if (action === GameAction.CREATE && rounds) {
     if (gameController) {
-      console.log('Unable');
+      console.log('Unable - gameController already exists');
       return next(new Error('Unable to create a game'));
     }
     gameController = new GameController({
       maxRounds: Number(rounds),
       firstPlayerName: nickname,
+      firstPlayerId: socketId
     });
   }
-
-
-  console.log(action);
   
-  if (action === GameAction.JOIN) {
-    console.log(1);
-    
+  if (action === GameAction.JOIN) {    
     if (!gameId || typeof gameId !== 'string') {
       return next(new Error('Game Id is incorrect'));
     }
-    console.log(2);
-
-
 
     if (!gameController) {
       return next(new Error('Game doesn\'t exist'));
     }
 
-    const isJoinedSuccess = gameController.joinGame(gameId, nickname);
+    const isJoinedSuccess = gameController.joinGame(gameId, nickname, socketId);
+    console.log('isJoinedSuccess', isJoinedSuccess);
+    
 
     if (!isJoinedSuccess) {
       return next(new Error('Failed to join'));
     }
+
+    const game = gameController.getGame();
+    console.log(game);
+    
+    const opponentId = game.firstPlayer.id;
+
+    socket.to(opponentId).emit("game_info", game);
   }
 
   next();
@@ -96,7 +93,6 @@ app.get('/api/test', (_, res) => {
 });
 
 io.on('connection', (socket) => {
-  // createGame(socket.data.nickname);
   console.log('a user connected ', socket.data.nickname);
   if (gameController) {
     socket.emit('game_info', gameController.getGame());

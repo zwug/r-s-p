@@ -2,33 +2,32 @@ import { Row, Col, Form, Input, InputNumber, Button } from 'antd';
 import { ValidateErrorEntity } from 'rc-field-form/lib/interface';
 import { createGame } from '../../api/game';
 import { TCreateGameValues } from './types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TGame } from '@shared/types';
 import { gameService } from '../../services/game.service';
 import { useNavigate } from 'react-router-dom';
 import { ErrorMessage } from '../../components/error-message/error-message';
 
-type TCreateGameProps = {};
+interface TCreateGameProps {}
 
 export const CreateGameForm = ({}: TCreateGameProps): JSX.Element => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const sub = gameService.game$.subscribe((game) => {
+      if (!game) {
+        navigate('/game');
+      }
+    });
+
+    return () => {
+      sub.unsubscribe();
+    };
+  }, []);
+
   const onFinish = (values: TCreateGameValues) => {
-    const socket = createGame(values);
-
-    socket.on('connect_error', (err) => {
-      setError(err.message);
-      socket.off('connect_error');
-    });
-
-    socket.on('game_info', (game: TGame) => {
-      gameService.setGame(game);
-      gameService.setPlayer({
-        nickname: values.nickname,
-      });
-      navigate('/game');
-    });
+    gameService.createGame(values);
   };
 
   const onFinishFailed = (
@@ -54,7 +53,7 @@ export const CreateGameForm = ({}: TCreateGameProps): JSX.Element => {
                   label="Nickname"
                   name="nickname"
                   rules={[
-                    { required: true, message: 'Please input your username' },
+                    { required: true, message: 'Please input your username' }
                   ]}
                 >
                   <Input />

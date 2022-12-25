@@ -1,5 +1,5 @@
 import { Row, Col, Form, Input, Button } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ErrorMessage } from '../../components/error-message/error-message';
 import { TJoinGameValues } from './types';
 import { ValidateErrorEntity } from 'rc-field-form/lib/interface';
@@ -12,19 +12,20 @@ export const JoinGameForm = (): JSX.Element => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const sub = gameService.game$.subscribe((game) => {
+      if (!game) {
+        navigate('/game');
+      }
+    });
+
+    return () => {
+      sub.unsubscribe();
+    };
+  }, []);
+
   const onFinish = (values: TJoinGameValues) => {
-    const socket = joinGame(values);
-    socket.on('connect_error', (err) => {
-      setError(err.message);
-      socket.off('connect_error');
-    });
-    socket.on('game_info', (game: TGame) => {
-      gameService.setGame(game);
-      gameService.setPlayer({
-        nickname: values.nickname,
-      });
-      navigate('/game');
-    });
+    gameService.joinGame(values);
   };
 
   const onFinishFailed = (errorInfo: ValidateErrorEntity<TJoinGameValues>) => {
@@ -49,7 +50,7 @@ export const JoinGameForm = (): JSX.Element => {
                     label="Nickname"
                     name="nickname"
                     rules={[
-                      { required: true, message: 'Please input your username' },
+                      { required: true, message: 'Please input your username' }
                     ]}
                   >
                     <Input />
@@ -62,7 +63,7 @@ export const JoinGameForm = (): JSX.Element => {
                     label="Game ID"
                     name="gameId"
                     rules={[
-                      { required: true, message: 'Please input game ID' },
+                      { required: true, message: 'Please input game ID' }
                     ]}
                   >
                     <Input />

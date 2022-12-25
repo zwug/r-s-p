@@ -24,7 +24,7 @@ enum RoundResult {
 }
 
 export type TPlayer = {
-  // id: string;
+  id: string;
   nickname: string;
 };
 
