@@ -8,8 +8,9 @@ import {
   TInterServerEvents,
   TServerToClientEvents,
   TSocketData,
-} from './src/types';
+} from './shared/types';
 import { GameController } from './src/game';
+import { GameAction } from './src/const';
 
 dotenv.config();
 
@@ -37,9 +38,12 @@ const io = new Server<
 
 app.use(cors(corsOptions));
 
-io.use(async (socket, next) => {
+io.use((socket, next) => {
   // const sockets = await io.fetchSockets();
   // console.log(sockets.length);
+
+  console.log('use');
+  
 
   const nickname = socket.handshake.auth.nickname;
   if (!nickname) {
@@ -47,11 +51,12 @@ io.use(async (socket, next) => {
   }
   socket.data.nickname = nickname;
 
-  const { rounds, gameId } = socket.handshake.query;
+  const { rounds, gameId, action } = socket.handshake.query;
 
-  if (rounds) {
+  if (action === GameAction.CREATE && rounds) {
     if (gameController) {
-      return next(new Error('unable to create a game'));
+      console.log('Unable');
+      return next(new Error('Unable to create a game'));
     }
     gameController = new GameController({
       maxRounds: Number(rounds),
@@ -59,10 +64,27 @@ io.use(async (socket, next) => {
     });
   }
 
-  if (gameId && typeof gameId === 'string' && gameController) {
+
+  console.log(action);
+  
+  if (action === GameAction.JOIN) {
+    console.log(1);
+    
+    if (!gameId || typeof gameId !== 'string') {
+      return next(new Error('Game Id is incorrect'));
+    }
+    console.log(2);
+
+
+
+    if (!gameController) {
+      return next(new Error('Game doesn\'t exist'));
+    }
+
     const isJoinedSuccess = gameController.joinGame(gameId, nickname);
+
     if (!isJoinedSuccess) {
-      return next(new Error('unable to join'));
+      return next(new Error('Failed to join'));
     }
   }
 

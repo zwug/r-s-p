@@ -1,4 +1,4 @@
-import { TGame } from './types';
+import { TGame } from '../shared/types';
 import { generateId } from './utils';
 
 export type TGameProps = {
@@ -24,7 +24,7 @@ export class GameController {
     return this._game;
   }
 
-  joinGame(gameId: string, playerName: string) {
+  joinGame(gameId: string, playerName: string) {    
     if (this._game.id !== gameId || this._game.secondPlayer) {
       return false;
     }

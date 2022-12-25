@@ -1,15 +1,18 @@
-import { Row, Col, Form, Input, InputNumber, Button, Alert, Space } from 'antd';
+import { Row, Col, Form, Input, InputNumber, Button } from 'antd';
 import { ValidateErrorEntity } from 'rc-field-form/lib/interface';
-import { createGame } from '../../api/create-game';
+import { createGame } from '../../api/game';
 import { TCreateGameValues } from './types';
-import style from './create-game-form.module.css';
 import { useState } from 'react';
-import cn from 'classnames';
+import { TGame } from '@shared/types';
+import { gameService } from '../../services/game.service';
+import { useNavigate } from 'react-router-dom';
+import { ErrorMessage } from '../../components/error-message/error-message';
 
 type TCreateGameProps = {};
 
 export const CreateGameForm = ({}: TCreateGameProps): JSX.Element => {
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const onFinish = (values: TCreateGameValues) => {
     const socket = createGame(values);
@@ -19,8 +22,12 @@ export const CreateGameForm = ({}: TCreateGameProps): JSX.Element => {
       socket.off('connect_error');
     });
 
-    socket.on('game_info', (game) => {
-      console.log(game);
+    socket.on('game_info', (game: TGame) => {
+      gameService.setGame(game);
+      gameService.setPlayer({
+        nickname: values.nickname,
+      });
+      navigate('/game');
     });
   };
 
@@ -31,21 +38,21 @@ export const CreateGameForm = ({}: TCreateGameProps): JSX.Element => {
   };
 
   return (
-    <Row justify='space-between'>
+    <Row justify="space-between">
       <Col xs={{ span: 22, offset: 1 }} lg={{ span: 10, offset: 7 }}>
         <Form<TCreateGameValues>
-          name='createGame'
-          layout='vertical'
+          name="createGame"
+          layout="vertical"
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
-          autoComplete='off'
+          autoComplete="off"
         >
-          <Row justify='space-between'>
+          <Row justify="space-between">
             <Col span={8}>
-              <Row justify='start'>
+              <Row justify="start">
                 <Form.Item
-                  label='Nickname'
-                  name='nickname'
+                  label="Nickname"
+                  name="nickname"
                   rules={[
                     { required: true, message: 'Please input your username' },
                   ]}
@@ -55,14 +62,14 @@ export const CreateGameForm = ({}: TCreateGameProps): JSX.Element => {
               </Row>
             </Col>
             <Col span={8}>
-              <Row justify='start'>
+              <Row justify="start">
                 <Form.Item
-                  label='Rounds'
-                  labelAlign='right'
-                  name='rounds'
+                  label="Rounds"
+                  labelAlign="right"
+                  name="rounds"
                   rules={[{ required: true, message: 'Please input rounds' }]}
                 >
-                  <Row justify='start'>
+                  <Row justify="start">
                     <InputNumber min={1} />
                   </Row>
                 </Form.Item>
@@ -70,16 +77,10 @@ export const CreateGameForm = ({}: TCreateGameProps): JSX.Element => {
             </Col>
           </Row>
 
-          <Space className={style.errorContainer} direction='vertical'>
-            <Alert
-              className={cn({ [style.errorHidden]: !error })}
-              message={error}
-              type='error'
-            />
-          </Space>
+          <ErrorMessage error={error} />
 
           <Form.Item wrapperCol={{ offset: 8, span: 8 }}>
-            <Button type='primary' htmlType='submit'>
+            <Button type="primary" htmlType="submit">
               Create game
             </Button>
           </Form.Item>

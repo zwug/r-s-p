@@ -1,25 +1,25 @@
 import { Typography } from 'antd';
-import { useEffect } from 'react';
 import { Route, Routes } from 'react-router';
 import './App.css';
 import { CreateGame } from './containers/create-game';
 import { Main } from './containers/main';
 import { BrowserRouter } from 'react-router-dom';
+import { Game } from './containers/game/game';
+import { JoinGame } from './containers/join-game/join-game';
+import { Layout } from './components/layout/layout';
 
 function App() {
-  useEffect(() => {
-    fetch('http://localhost:8000/api/test').then((res) => console.log(res));
-  }, []);
-
   return (
     <BrowserRouter>
-      <div className='App'>
-        <Typography.Title>Rock, paper, scissors</Typography.Title>
+      <Layout>
+        <Typography.Title>Rock paper scissors</Typography.Title>
         <Routes>
-          <Route path='' element={<Main />}></Route>
-          <Route path='/create' element={<CreateGame />}></Route>
+          <Route path="" element={<Main />}></Route>
+          <Route path="/create" element={<CreateGame />}></Route>
+          <Route path="/join" element={<JoinGame />}></Route>
+          <Route path="/game" element={<Game />}></Route>
         </Routes>
-      </div>
+      </Layout>
     </BrowserRouter>
   );
 }

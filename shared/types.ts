@@ -23,7 +23,7 @@ enum RoundResult {
   SECOND_PLAYER_WIN = 'second_player_win',
 }
 
-type TPlayer = {
+export type TPlayer = {
   // id: string;
   nickname: string;
 };
@@ -38,7 +38,7 @@ type TRound = {
   secondPlayerMove?: TPlayerMove;
   result: RoundResult;
 };
-export interface TGame {
+export type TGame = {
   id: string;
   maxRounds: number;
   firstPlayer: TPlayer;
